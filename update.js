@@ -4,6 +4,7 @@ const request = require('request');
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
+const yaml = require('js-yaml');
 
 const nodeKeys = fs.readFileSync(path.join('keys', 'node.keys')).toString().split('\n').join(' \\\n    ').trim();
 const yarnKeys = fs.readFileSync(path.join('keys', 'yarn.keys')).toString().split('\n').join(' \\\n    ').trim();
@@ -42,6 +43,38 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
                   updateDockerFile(details, yarn);
                 }
               }
+            }
+
+            try {
+              let travis = yaml.safeLoad(fs.readFileSync('.travis.yml', 'utf8'));
+
+              // Filter out the existing Docker jobs
+              let jobs = travis.jobs.include.filter(record => {
+                return record.stage !== 'Build'
+              });
+
+              glob(`**/Dockerfile`, function (err, files) {
+                if (err) {
+                  return console.log(err);
+                }
+                files.forEach(file => {
+                  let job = {stage: 'Build', env: []}
+                  let nodeVersion = file.split('/')[0];
+                  let variant = file.split('/')[-2];
+                  if (nodeVersion === 'chakracore'){
+                    nodeVersion = file.replace('/Dockerfile', '');
+                    variant = 'default'
+                  }
+                  job.env.push({NODE_VERSION: nodeVersion})
+                  job.env.push({VARIANT: variant})
+                  travis.jobs.include.push(job);
+                })
+              })
+              // travis.jobs.include = jobs
+              // console.log(travis.jobs.include);
+              fs.writeFileSync('.travis.yml', yaml.safeDump(travis))
+            } catch (e) {
+              console.log(e);
             }
           }
         })
