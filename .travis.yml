@@ -60,6 +60,8 @@ jobs:
       env:
         - TEST: .travis.yml and Docker consistency
       language: node_js
+      node_js:
+        - lts/*
       script:
         - node update.js
         - git diff --stat --exit-code
