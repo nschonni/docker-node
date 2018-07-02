@@ -59,7 +59,7 @@ jobs:
     - stage: Test
       env:
         - TEST: .travis.yml and Docker consistency
-      language: generic
+      language: node_js
       script:
         - node update.js
         - git diff --stat --exit-code
