@@ -58,10 +58,10 @@ jobs:
       script: shellcheck *.sh
     - stage: Test
       env:
-        - TEST: ".travis.yml and Docker consistency"
+        - TEST: .travis.yml and Docker consistency
       language: generic
       script:
-        - ./update.js
+        - node update.js
         - git diff --stat --exit-code
     - stage: Deploy
       script: ./generate-stackbrew-pr.sh
