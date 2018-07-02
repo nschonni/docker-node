@@ -11,6 +11,7 @@ const yarnKeys = fs.readFileSync(path.join('keys', 'yarn.keys')).toString().spli
 
 request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json', function (error, response, body) {
   let supported_versions = [];
+  let supported_versions_chakra = [];
 
   if (!error && response.statusCode == 200) {
     let schedule = JSON.parse(body);
@@ -26,6 +27,7 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
       }
     }
 
+    supported_versions_chakra = Array.from(supported_versions);
     request('https://yarnpkg.com/latest-version', function (error, response, body) {
       if (!error && response.statusCode == 200) {
         let yarn = response.body.toString()
@@ -45,37 +47,59 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
               }
             }
 
-            try {
-              let travis = yaml.safeLoad(fs.readFileSync('.travis.yml', 'utf8'));
-
-              // Filter out the existing Docker jobs
-              let jobs = travis.jobs.include.filter(record => {
-                return record.stage !== 'Build'
-              });
-
-              glob(`**/Dockerfile`, function (err, files) {
-                if (err) {
-                  return console.log(err);
-                }
-                files.forEach(file => {
-                  let job = {stage: 'Build', env: []}
-                  let nodeVersion = file.split('/')[0];
-                  let variant = file.split('/')[-2];
-                  if (nodeVersion === 'chakracore'){
-                    nodeVersion = file.replace('/Dockerfile', '');
-                    variant = 'default'
+            request('https://nodejs.org/download/chakracore-release/index.json', function (error, response, body) {
+              if (!error && response.statusCode == 200) {
+                let indexChakra = JSON.parse(body);
+                for (var record in indexChakra) {
+                  if (indexChakra.hasOwnProperty(record)) {
+                    let chakra = indexChakra[record];
+                    let version = chakra.version;
+                    let major = version.split('.')[0]
+                    if (supported_versions_chakra.indexOf(major) != -1) {
+                      supported_versions_chakra.pop(); // First hit should be the latests
+                      updateDockerFile(chakra, yarn, 'chakracore');
+                    }
                   }
-                  job.env.push({NODE_VERSION: nodeVersion})
-                  job.env.push({VARIANT: variant})
-                  travis.jobs.include.push(job);
-                })
-              })
-              // travis.jobs.include = jobs
-              // console.log(travis.jobs.include);
-              fs.writeFileSync('.travis.yml', yaml.safeDump(travis))
-            } catch (e) {
-              console.log(e);
-            }
+                }
+
+                try {
+                  let travis = yaml.safeLoad(fs.readFileSync('.travis.yml', 'utf8'));
+
+                  // Filter out the existing Docker jobs
+                  let jobs = travis.jobs.include.filter(record => {
+                    return record.stage !== 'Build'
+                  });
+
+                  glob(`**/Dockerfile`, function (err, files) {
+                    if (err) {
+                      return console.log(err);
+                    }
+                    files.forEach(file => {
+                      let job = {
+                        stage: 'Build',
+                        env: []
+                      }
+                      let nodeVersion = file.split('/')[0];
+                      let variant = file.split('/')[-2];
+                      if (nodeVersion === 'chakracore') {
+                        nodeVersion = file.replace('/Dockerfile', '');
+                        variant = 'default'
+                      }
+                      job.env.push({
+                        NODE_VERSION: nodeVersion
+                      })
+                      job.env.push({
+                        VARIANT: variant
+                      })
+                      travis.jobs.include.push(job);
+                    })
+                  })
+                  fs.writeFileSync('.travis.yml', yaml.safeDump(travis))
+                } catch (e) {
+                  console.log(e);
+                }
+              }
+            })
           }
         })
       }
@@ -83,11 +107,11 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
   }
 });
 
-function updateDockerFile(nodejs, yarn) {
+function updateDockerFile(nodejs, yarn, root = '') {
   let nodeNext = nodejs.version.replace('v', '');
   let nodeMajor = nodeNext.split('.')[0];
   let nodeNextMinor = nodeNext.split('.')[1];
-  let versions = JSON.parse(fs.readFileSync(path.join(nodeMajor, 'versions.json')));
+  let versions = JSON.parse(fs.readFileSync(path.join(root, nodeMajor, 'versions.json')));
 
   // // Check for current version
   let nodePrevious = versions.nodejs;
@@ -96,7 +120,7 @@ function updateDockerFile(nodejs, yarn) {
   if (nodePrevious === nodeNext) {
     // No updates need
     return;
-  } else if (nodePreviousMajor === nodeNextMajor && nodePreviousMinor !== nodeNextMinor) {
+  } else if (nodePreviousMinor !== nodeNextMinor) {
     // Minor patch will bump Yarn
     versions.yarn = yarn;
     // Alpine doesn't have a direct latest endpoint, but parsing git-tags is possible
@@ -104,16 +128,25 @@ function updateDockerFile(nodejs, yarn) {
 
   // Update version file
   versions.nodejs = nodeNext
-  fs.writeFileSync(path.join(nodeMajor, 'versions.json'), JSON.stringify(versions, null, '  ') + '\n')
+  fs.writeFileSync(path.join(root, nodeMajor, 'versions.json'), JSON.stringify(versions, null, '  ') + '\n')
 
   // Update templates
-  glob(`${nodeMajor}/**/Dockerfile`, function (err, files) {
+  let pattern = `${nodeMajor}/**/Dockerfile`
+  if (root) {
+    pattern = root + '/' + pattern;
+  }
+  glob(pattern, function (err, files) {
     if (err) {
       return console.log(err);
     }
     files.forEach(file => {
-      let variant = file.replace(nodeMajor, '').replace('Dockerfile', '').replace(/\//g, '');
-      let template = fs.readFileSync(`Dockerfile-${variant}.template`).toString();
+      let variant = file.replace(root, '').replace(nodeMajor, '').replace('Dockerfile', '').replace(/\//g, '');
+      let template = '';
+      if (root) {
+        template = fs.readFileSync(path.join(root, 'Dockerfile.template')).toString();
+      } else {
+        template = fs.readFileSync(`Dockerfile-${variant}.template`).toString();
+      }
 
       template = template.replace('ENV NODE_VERSION 0.0.0', `ENV NODE_VERSION ${versions.nodejs}`)
       template = template.replace('ENV YARN_VERSION 0.0.0', `ENV YARN_VERSION ${versions.yarn}`)
