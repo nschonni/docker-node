@@ -104,7 +104,7 @@ function updateDockerFile(nodejs, yarn) {
 
   // Update version file
   versions.nodejs = nodeNext
-  fs.writeFileSync(path.join(nodeMajor, 'versions.json'), JSON.stringify(versions))
+  fs.writeFileSync(path.join(nodeMajor, 'versions.json'), JSON.stringify(versions, null, '  ') + '\n')
 
   // Update templates
   glob(`${nodeMajor}/**/Dockerfile`, function (err, files) {
