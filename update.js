@@ -66,11 +66,11 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
                   let travis = yaml.safeLoad(fs.readFileSync('.travis.yml', 'utf8'));
 
                   // Filter out the existing Docker jobs
-                  let jobs = travis.jobs.include.filter(record => {
+                  travis.jobs.include = travis.jobs.include.filter(record => {
                     return record.stage !== 'Build'
                   });
 
-                  glob(`**/Dockerfile`, function (err, files) {
+                  glob(`**/Dockerfile`, {ignore: 'node_modules/**'}, function (err, files) {
                     if (err) {
                       return console.log(err);
                     }
@@ -80,10 +80,11 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
                         env: []
                       }
                       let nodeVersion = file.split('/')[0];
-                      let variant = file.split('/')[-2];
-                      if (nodeVersion === 'chakracore') {
-                        nodeVersion = file.replace('/Dockerfile', '');
+                      let variant = file.replace(/\d*/g, '').replace('Dockerfile', '').replace(/\//g, '');
+                      if (variant === 'chakracore')
+                      {
                         variant = 'default'
+                        nodeVersion = file.replace('/Dockerfile', '');
                       }
                       job.env.push({
                         NODE_VERSION: nodeVersion
@@ -93,8 +94,8 @@ request('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json',
                       })
                       travis.jobs.include.push(job);
                     })
+                    fs.writeFileSync('.travis.yml', yaml.safeDump(travis))
                   })
-                  fs.writeFileSync('.travis.yml', yaml.safeDump(travis))
                 } catch (e) {
                   console.log(e);
                 }
