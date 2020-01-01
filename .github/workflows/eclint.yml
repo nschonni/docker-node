@@ -1,0 +1,13 @@
+name: Test Whitespace and line endings
+
+on: [pull_request]
+
+jobs:
+  eclint:
+    name: Editor Config check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: snow-actions/eclint@v1.0.1
+      with:
+        args: 'check'
