@@ -1,14 +1,21 @@
 name: Check Shell scripts
 
 on:
-  pull_request:
+  push:
     paths:
       - "**/*.sh"
 
 jobs:
-  sh-checker:
+  shfmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Run the sh-checker
-        uses: luizm/action-sh-checker@v0.1.0
+      - run: docker run -it --rm -v "$(pwd)":/sh -w /sh peterdavehello/shfmt:2.6.3 shfmt -sr -i 2 -l -w -ci .
+      - run: git diff --color
+      - run: git diff --stat=220 --color --exit-code
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: shellcheck *.sh
