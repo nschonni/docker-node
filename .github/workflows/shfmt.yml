@@ -1,7 +1,7 @@
 name: Check Shell scripts
 
 on:
-  push:
+  pull_request:
     paths:
       - "**/*.sh"
 
