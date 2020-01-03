@@ -146,6 +146,7 @@ function update_node_version() {
     fi
     sed -Ei -e 's/^(ENV YARN_VERSION ).*/\1'"${yarnVersion}"'/' "${dockerfile}-tmp"
 
+    # shellcheck disable=SC1004
     new_line=' \\\
 '
 
