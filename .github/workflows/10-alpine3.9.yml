@@ -1,0 +1,17 @@
+name: 10 on alpine3.9
+
+on:
+  pull_request:
+    paths:
+      - 10/alpine3.9/Dockerfile
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: sudo apt-get install bats
+      - run: ./test-build.sh $NODE_VERSION $VARIANT
+    env:
+      NODE_VERSION: "10"
+      VARIANT: "alpine3.9"

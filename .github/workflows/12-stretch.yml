@@ -1,0 +1,17 @@
+name: 12 on stretch
+
+on:
+  pull_request:
+    paths:
+      - 12/stretch/Dockerfile
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: sudo apt-get install bats
+      - run: ./test-build.sh $NODE_VERSION $VARIANT
+    env:
+      NODE_VERSION: "12"
+      VARIANT: "stretch"
