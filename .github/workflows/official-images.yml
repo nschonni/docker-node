@@ -33,7 +33,7 @@ jobs:
       - name: Generate Stackbrew for diff
         run: |
           cd docker-node
-          ./generate-stackbrew-library.sh
+          ./generate-stackbrew-library.sh > ../official-images/library/node
 
       - name: Print Stackbrew
         run: cat official-images/library/node
