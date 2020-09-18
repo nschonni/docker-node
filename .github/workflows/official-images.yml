@@ -19,12 +19,12 @@ jobs:
       - name: Checkout the docker-node repo
         uses: actions/checkout@v2
         with:
-          folder: docker-node
+          path: docker-node
 
       - name: Checkout the official-images repo
         uses: actions/checkout@v2
         with:
-          folder: official-images
+          path: official-images
           repository: docker-library/official-images
 
       - name: Generate Stackbrew for diff
