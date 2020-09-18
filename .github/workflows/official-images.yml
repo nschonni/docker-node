@@ -16,15 +16,21 @@ jobs:
     # if: github.repository_owner == 'nodejs'
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout the docker-node repo
+        uses: actions/checkout@v2
         with:
           folder: docker-node
 
-      - uses: actions/checkout@v2
+      - name: Checkout the official-images repo
+        uses: actions/checkout@v2
         with:
           folder: official-images
           repository: docker-library/official-images
 
-      - run: ./docker-node/generate-stackbrew-library.sh >> official-images/library/node
+      - name: Generate Stackbrew for diff
+        run: ./docker-node/generate-stackbrew-library.sh >> official-images/library/node
 
-      - run: echo 'I should create a PR'
+      - name: Check for diff
+        run: |
+          cd official-images
+          git diff --exit-code
