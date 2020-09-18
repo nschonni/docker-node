@@ -28,7 +28,10 @@ jobs:
           repository: docker-library/official-images
 
       - name: Generate Stackbrew for diff
-        run: ./docker-node/generate-stackbrew-library.sh >> official-images/library/node
+        run: ./docker-node/generate-stackbrew-library.sh
+
+      - name: Generate Stackbrew for diff
+        run: cat official-images/library/node
 
       - name: Check for diff
         run: |
