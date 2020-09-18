@@ -1,0 +1,30 @@
+name: PR to official images
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**/Dockerfile"
+      - "**/docker-entrypoint.sh"
+      - "generate-stackbrew-*.sh"
+      - ".github/workflows/official-images.yml"
+
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'nodejs'
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          folder: docker-node
+
+      - uses: actions/checkout@v2
+        with:
+          folder: official-images
+          repository: docker-library/official-images
+
+      - run: ./docker-node/generate-stackbrew-library.sh >> official-images/library/node
+
+      - run: echo 'I should create a PR'
