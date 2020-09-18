@@ -27,10 +27,15 @@ jobs:
           path: official-images
           repository: docker-library/official-images
 
-      - name: Generate Stackbrew for diff
-        run: ./docker-node/generate-stackbrew-library.sh
+      - name: Print Stackbrew
+        run: cat official-images/library/node
 
       - name: Generate Stackbrew for diff
+        run: |
+          cd docker-node
+          ./generate-stackbrew-library.sh > ../offical-images/library/node
+
+      - name: Print Stackbrew
         run: cat official-images/library/node
 
       - name: Check for diff
