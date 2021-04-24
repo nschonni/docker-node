@@ -5,8 +5,8 @@
     "maintenance": "2022-10-18",
     "end": "2024-04-30",
     "codename": "",
-    "alpine-default": "alpine3.11",
-    "debian-default": "stretch",
+    "alpine-default": "alpine3.13",
+    "debian-default": "buster",
     "variants": {
       "alpine3.11": [
         "amd64",
