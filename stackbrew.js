@@ -21,7 +21,7 @@ GitFetch: refs/heads/main\n`;
 
 // Loop versions
 
-const config = JSON.parse(fs.readFileSync('versions.json', 'utf-8'));
+const config = require('./versions.json');
 
 const versions = Object.keys(config).reverse()
 
@@ -40,14 +40,14 @@ for(version of versions) {
   let variants = config[version].variants
   let fullversion;
   for(variant in variants) {
-    let dockerpath = path.join(version, variant, 'Dockerfile');
+    let dockerfilePath = path.join(version, variant, 'Dockerfile');
     let isAlpine = aplineRE.test(variant)
     let isSlim = slimRE.test(variant)
     let isDefaultSlim = new RegExp(`${defaultDebian}-slim`).test(variant)
 
     // Get full version from the first Dockerfile
     if (!fullversion) {
-      let dockerfile = fs.readFileSync(dockerpath, 'utf-8')
+      let dockerfile = fs.readFileSync(dockerfilePath, 'utf-8')
       fullversion = dockerfile.match(/ENV NODE_VERSION (?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)/)
     }
     let tags = [
@@ -143,7 +143,7 @@ for(version of versions) {
 
     stackbrew += `\nTags: ${tags.join(', ')}\n`
     stackbrew += `Architectures: ${config[version].variants[variant].join(', ')}\n`
-    stackbrew += `GitCommit: ${getCommitHasForPath(dockerpath)}\n`
+    stackbrew += `GitCommit: ${getCommitHasForPath(dockerfilePath)}\n`
     stackbrew += `Directory: ${version}/${variant}\n`
   }
 }
