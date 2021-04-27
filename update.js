@@ -51,6 +51,8 @@ for(version of versions) {
     // ENV YARN_VERSION 0.0.0
     // ${YARN_KEYS[@]}
 
+    // Update Python version
+    // ${PYTHON_VERSION}
 
     // Write resulting Dockerfile
     fs.writeFileSync(dockerfilePath, dockerfile);
