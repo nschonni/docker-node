@@ -1,4 +1,4 @@
-FROM alpine:0.0
+FROM $FROMTAG
 
 ENV NODE_VERSION 0.0.0
 

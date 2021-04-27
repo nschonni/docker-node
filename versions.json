@@ -7,6 +7,7 @@
     "codename": "",
     "alpine-default": "alpine3.13",
     "debian-default": "buster",
+    "python": "python3",
     "variants": {
       "alpine3.11": [
         "amd64",
@@ -64,6 +65,7 @@
     "end": "2021-06-01",
     "alpine-default": "alpine3.11",
     "debian-default": "stretch",
+    "python": "python3",
     "variants": {
       "alpine3.10": [
         "amd64",
@@ -131,6 +133,7 @@
     "codename": "fermium",
     "alpine-default": "alpine3.11",
     "debian-default": "stretch",
+    "python": "python3",
     "variants": {
       "alpine3.10": [
         "amd64",
@@ -198,6 +201,7 @@
     "codename": "erbium",
     "alpine-default": "alpine3.11",
     "debian-default": "stretch",
+    "python": "python2",
     "variants": {
       "alpine3.10": [
         "amd64",
@@ -257,6 +261,7 @@
     "codename": "dubnium",
     "alpine-default": "alpine3.11",
     "debian-default": "stretch",
+    "python": "python2",
     "variants": {
       "alpine3.10": [
         "amd64",
