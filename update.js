@@ -2,16 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const config = require('./versions.json');
 
 const yarnVersion = '1.22.5';
 
 const yarnKeys = ['6A010C5166006599AA17F08146C2130DFD2497F5']
-
-const nodeKeys = fs.readFileSync(path.join('keys', 'node.keys'), 'utf-8').split('\n')
-
-const versions = Object.keys(config).reverse()
 
 const entrypointScript = `#!/bin/sh
 set -e
@@ -24,24 +21,61 @@ exec "$@"
 `
 const aplineRE = new RegExp(/alpine*/);
 const slimRE = new RegExp(/\*-slim/);
+const leadingSpaceRE = new RegExp(/(?<spaces>\s+)"\${NODE_KEYS\[@\]}"/);
 
-for(version of versions) {
+const nodeKeys = fs.readFileSync(path.join('keys', 'node.keys'), 'utf-8').split('\n')
+
+const versions = Object.keys(config).reverse()
+
+const nodeVersionsUrl = 'https://nodejs.org/dist/index.json';
+let nodeVersionData;
+
+https.get(nodeVersionsUrl, (res) => {
+  let body = "";
+
+  res.on("data", (chunk) => {
+    body += chunk;
+  });
+
+  res.on("end", () => {
+    try {
+      nodeVersionData = JSON.parse(body);
+      nodeVersionData = nodeVersionData.map(item => item.version.replace('v', ''))
+      // console.log(nodeVersionData)
+      updateImages()
+    } catch (error) {
+      console.error(error.message);
+    };
+  });
+
+}).on("error", (error) => {
+  console.error(error.message);
+});
+
+
+function updateImages() {
+
+for (version of versions) {
 
   let variants = config[version].variants
   let pythonVersion = config[version].python
-  for(variant in variants) {
+  let currentVersion = nodeVersionData.find((currentValue) => {
+    return currentValue.split('.')[0] === version
+  })
+  // console.log(currentVersion)
+  for (variant in variants) {
     let dockerfilePath = path.join(version, variant, 'Dockerfile');
     let isAlpine = aplineRE.test(variant)
     let isSlim = slimRE.test(variant)
 
     let templatePath = '';
     let fromTemplate = '';
-    if(isAlpine) {
+    if (isAlpine) {
       templatePath = path.join('Dockerfile-alpine.template');
       let alpineVersion = variant.match(/alpine(?<major>\d+)\.(?<minor>\d+)/)
       fromTemplate = `FROM alpine:${alpineVersion.groups.major}.${alpineVersion.groups.minor}`
       // TODO: Get CHECKSUM
-    } else if(isSlim) {
+    } else if (isSlim) {
       templatePath = path.join('Dockerfile-slim.template');
       fromTemplate = `FROM debian:${variant}`
     } else {
@@ -57,10 +91,11 @@ for(version of versions) {
 
     // Get version
     // ENV NODE_VERSION 0.0.0
-    // https://nodejs.org/dist/index.json
+    dockerfile = dockerfile.replace('ENV NODE_VERSION 0.0.0', `ENV NODE_VERSION ${currentVersion}`)
 
     // Replace signing keys
-    dockerfile = dockerfile.replace('"${NODE_KEYS[@]}"', `${nodeKeys.join(' \\\n      ').trimEnd()}`)
+    let leadingSpace = dockerfile.match(leadingSpaceRE).groups.spaces.replace('\n', '')
+    dockerfile = dockerfile.replace('"${NODE_KEYS[@]}"', `${nodeKeys.join(` \\\n${leadingSpace}`).trimEnd()}`)
 
     // Get Yarn
     // https://classic.yarnpkg.com/latest-version
@@ -79,4 +114,5 @@ for(version of versions) {
     let entrypointPath = path.join(version, variant, 'docker-entrypoint.sh');
     fs.writeFileSync(entrypointPath, entrypointScript);
   }
+}
 }
