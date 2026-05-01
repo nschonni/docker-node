@@ -33,7 +33,7 @@ const slimRE = new RegExp(/\*-slim/);
 let foundLTS = false;
 let foundCurrent = false;
 
-for (version of versions) {
+for (const version of versions) {
   let lts = new Date(`${config[version].lts}T00:00:00.00`).getTime();
   let maintenance = new Date(`${config[version].maintenance}T00:00:00.00`).getTime();
   let isCurrent = foundCurrent ? false : isNaN(lts) || lts >= now;
@@ -45,7 +45,7 @@ for (version of versions) {
   let defaultDebian = config[version]['debian-default']
   let variants = config[version].variants
   let fullversion;
-  for (variant in variants) {
+  for (const variant in variants) {
     let dockerfilePath = path.join(version, variant, 'Dockerfile');
     let isAlpine = aplineRE.test(variant)
     let isSlim = slimRE.test(variant)
