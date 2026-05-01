@@ -125,8 +125,6 @@ for (const version of versions) {
 
     if (isLTS) {
       tags.push(`lts-${variant}`)
-      if (variant === defaultAlpine) {
-      }
       if (variant === defaultDebian) {
         tags.push('lts')
         if (codename) {
