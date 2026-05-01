@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Utlity functions
+# Utility functions
 # Don't change this file unless needed
 # The GitHub Action for automating new builds rely on this file
 
