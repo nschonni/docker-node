@@ -43,7 +43,6 @@ for (const version of versions) {
   let defaultAlpine = config[version]['alpine-default']
   let defaultDebian = config[version]['debian-default']
   let variants = config[version].variants
-  let fullversion;
   for (const variant in variants) {
     let dockerfilePath = path.join(version, variant, 'Dockerfile');
     let isAlpine = alpineRE.test(variant)
@@ -52,12 +51,12 @@ for (const version of versions) {
 
     // Get full version from the Dockerfile
     let dockerfile = fs.readFileSync(dockerfilePath, 'utf-8')
-    fullversion = dockerfile.match(/ENV NODE_VERSION=(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)/)
+    let fullVersion = dockerfile.match(/ENV NODE_VERSION=(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)/)
 
     let tags = [
-      `${fullversion.groups.major}.${fullversion.groups.minor}.${fullversion.groups.patch}-${variant}`,
-      `${fullversion.groups.major}.${fullversion.groups.minor}-${variant}`,
-      `${fullversion.groups.major}-${variant}`,
+      `${fullVersion.groups.major}.${fullVersion.groups.minor}.${fullVersion.groups.patch}-${variant}`,
+      `${fullVersion.groups.major}.${fullVersion.groups.minor}-${variant}`,
+      `${fullVersion.groups.major}-${variant}`,
     ]
 
     if (codename) {
@@ -65,31 +64,31 @@ for (const version of versions) {
     }
 
     if (variant === defaultAlpine) {
-      tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}.${fullversion.groups.patch}-alpine`)
-      tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}-alpine`)
-      tags.push(`${fullversion.groups.major}-alpine`)
+      tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}.${fullVersion.groups.patch}-alpine`)
+      tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}-alpine`)
+      tags.push(`${fullVersion.groups.major}-alpine`)
       if (codename) {
         tags.push(`${codename}-alpine`)
       }
     }
 
     if (variant === defaultDebian) {
-      tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}.${fullversion.groups.patch}`)
-      tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}`)
-      tags.push(`${fullversion.groups.major}`)
+      tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}.${fullVersion.groups.patch}`)
+      tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}`)
+      tags.push(`${fullVersion.groups.major}`)
       if (isSlim) {
-        tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}.${fullversion.groups.patch}-slim`)
-        tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}-slim`)
-        tags.push(`${fullversion.groups.major}-slim`)
+        tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}.${fullVersion.groups.patch}-slim`)
+        tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}-slim`)
+        tags.push(`${fullVersion.groups.major}-slim`)
       }
       if (codename) {
         tags.push(`${codename}`)
       }
     }
     if (isDefaultSlim) {
-      tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}.${fullversion.groups.patch}-slim`)
-      tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}-slim`)
-      tags.push(`${fullversion.groups.major}-slim`)
+      tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}.${fullVersion.groups.patch}-slim`)
+      tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}-slim`)
+      tags.push(`${fullVersion.groups.major}-slim`)
       if (codename) {
         tags.push(`${codename}-slim`)
       }
@@ -98,9 +97,9 @@ for (const version of versions) {
     if (isCurrent) {
       if (variant === defaultAlpine) {
         tags.push(variant)
-        tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}.${fullversion.groups.patch}-alpine`)
-        tags.push(`${fullversion.groups.major}.${fullversion.groups.minor}-alpine`)
-        tags.push(`${fullversion.groups.major}-alpine`)
+        tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}.${fullVersion.groups.patch}-alpine`)
+        tags.push(`${fullVersion.groups.major}.${fullVersion.groups.minor}-alpine`)
+        tags.push(`${fullVersion.groups.major}-alpine`)
         tags.push('alpine')
         tags.push('current-alpine')
       }
