@@ -35,7 +35,6 @@ let foundCurrent = false;
 
 for (const version of versions) {
   let lts = new Date(`${config[version].lts}T00:00:00.00`).getTime();
-  let maintenance = new Date(`${config[version].maintenance}T00:00:00.00`).getTime();
   let isCurrent = foundCurrent ? false : isNaN(lts) || lts >= now;
   foundCurrent = isCurrent || foundCurrent;
   let isLTS = foundLTS ? false : (now >= lts);
