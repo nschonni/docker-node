@@ -28,7 +28,7 @@ const versions = Object.keys(config).reverse()
 let midnight = new Date()
 midnight.setHours(0, 0, 0, 0)
 const now = midnight.getTime()
-const aplineRE = new RegExp(/alpine*/);
+const alpineRE = new RegExp(/alpine*/);
 const slimRE = new RegExp(/\*-slim/);
 let foundLTS = false;
 let foundCurrent = false;
@@ -46,7 +46,7 @@ for (const version of versions) {
   let fullversion;
   for (const variant in variants) {
     let dockerfilePath = path.join(version, variant, 'Dockerfile');
-    let isAlpine = aplineRE.test(variant)
+    let isAlpine = alpineRE.test(variant)
     let isSlim = slimRE.test(variant)
     let isDefaultSlim = new RegExp(`${defaultDebian}-slim`).test(variant)
 
