@@ -15,7 +15,9 @@ the Node.js TSC as final arbiter.
 
 ## Discussion Areas
 
+<!-- markdown-link-check-disable -->
 You can use Node.js channels (prefixed by `#nodejs-`) in the [OpenJSF Slack](https://slack-invite.openjsf.org/) workspace for discussions.
+<!-- markdown-link-check-enable -->
 
 - [#nodejs-distributions](https://openjs-foundation.slack.com/archives/C0ALS3UDE8G) covers discussions for this repo (`docker-node`).
 
