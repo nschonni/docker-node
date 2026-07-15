@@ -155,6 +155,7 @@ function update_node_version() {
         sed -Ei -e "s/(alpine:)0.0/\\1${alpine_version}/" "${dockerfile}-tmp"
 
         alpine_arch=''
+        local -a arches
         arches=$(jq -r ".\"${version}\".variants.\"alpine${alpine_version}\" | @sh" "versions.json")
         if [[ "${arches[0]}" == *"amd64"* ]]; then
           alpine_arch+='x86_64) ARCH='"'"'x64'"'"' CHECKSUM="'${checksum}'" OPENSSL_ARCH=linux-x86_64;; \\\n        '
@@ -177,6 +178,7 @@ function update_node_version() {
     elif is_debian "${variant}"; then
       sed -Ei -e "s/(buildpack-deps:)name/\\1${variant}/" "${dockerfile}-tmp"
       deb_arch=''
+      local -a arches
       arches=$(jq -r ".\"${version}\".variants.\"${variant}\" | @sh" "versions.json")
       if [[ "${arches[0]}" == *"amd64"* ]]; then
         deb_arch+='amd64) ARCH='"'"'x64'"'"';; \\\n    '
@@ -198,6 +200,7 @@ function update_node_version() {
     elif is_debian_slim "${variant}"; then
       sed -Ei -e "s/(debian:)name-slim/\\1${variant}/" "${dockerfile}-tmp"
       deb_arch=''
+      local -a arches
       arches=$(jq -r ".\"${version}\".variants.\"${variant}\" | @sh" "versions.json")
       if [[ "${arches[0]}" == *"amd64"* ]]; then
         deb_arch+='amd64) ARCH='"'"'x64'"'"' OPENSSL_ARCH='"'"'linux-x86_64'"'"';; \\\n      '
