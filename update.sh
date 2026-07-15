@@ -172,6 +172,7 @@ function update_node_version() {
         if [[ "${arches[0]}" == *"s390x"* ]]; then
           alpine_arch+='s390x) OPENSSL_ARCH=linux-s390x;; \\\n        '
         fi
+        # shellcheck disable=SC1003
         alpine_arch+='*) ;; \\'
         sed -Ei -e "s/\"\\$\{ALPINE_ARCH\[@\]\}\"/${alpine_arch}/" "${dockerfile}-tmp"
       fi
@@ -195,6 +196,7 @@ function update_node_version() {
       if [[ "${arches[0]}" == *"arm32v7"* ]]; then
         deb_arch+='armhf) ARCH='"'"'armv7l'"'"';; \\\n    '
       fi
+      # shellcheck disable=SC1003
       deb_arch+='*) echo "unsupported architecture"; exit 1 ;; \\'
       sed -Ei -e "s/\"\\$\{DEB_ARCH\[@\]\}\"/${deb_arch}/" "${dockerfile}-tmp"
     elif is_debian_slim "${variant}"; then
@@ -217,6 +219,7 @@ function update_node_version() {
       if [[ "${arches[0]}" == *"arm32v7"* ]]; then
         deb_arch+='armhf) ARCH='"'"'armv7l'"'"' OPENSSL_ARCH='"'"'linux-armv4'"'"';; \\\n      '
       fi
+      # shellcheck disable=SC1003
       deb_arch+='*) echo "unsupported architecture"; exit 1 ;; \\'
       sed -Ei -e "s/\"\\$\{DEB_ARCH\[@\]\}\"/${deb_arch}/" "${dockerfile}-tmp"
     fi
