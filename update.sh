@@ -145,9 +145,16 @@ function update_node_version() {
 
     if is_alpine "${variant}"; then
       alpine_version="${variant#*alpine}"
-      checksum=$(
-        curl -sSL --compressed "https://unofficial-builds.nodejs.org/download/release/v${nodeVersion}/SHASUMS256.txt" | grep "node-v${nodeVersion}-linux-x64-musl.tar.xz" | cut -d' ' -f1
-      )
+
+      if [ "${version}" -eq "22" ]; then
+        checksum=$(
+          curl -sSL --compressed "https://unofficial-builds.nodejs.org/download/release/v${nodeVersion}/SHASUMS256.txt" | grep "node-v${nodeVersion}-linux-x64-musl.tar.xz" | cut -d' ' -f1
+        )
+      else
+        # Assume that now that Alpine in Tier 2, the musl builds are available with everything else.
+        checksum="TRUE"
+      fi
+
       if [ -z "$checksum" ]; then
         rm -f "${dockerfile}-tmp"
         if [ "${SKIP_ALPINE}" = true ]; then
