@@ -291,7 +291,11 @@ for version in "${versions[@]}"; do
     elif is_debian_slim "${variant}"; then
       template_file="${parentpath}/Dockerfile-slim.template"
     elif is_alpine "${variant}"; then
-      template_file="${parentpath}/Dockerfile-alpine.template"
+      if [ "${version}" -eq "22" ]; then
+        template_file="${parentpath}/Dockerfile-alpine-unofficial.template"
+      else
+        template_file="${parentpath}/Dockerfile-alpine.template"
+      fi
     fi
 
     cp "${parentpath}/docker-entrypoint.sh" "${version}/${variant}/docker-entrypoint.sh"
